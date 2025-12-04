@@ -1,0 +1,347 @@
+---
+title: "**UNIVERSIDAD NACIONAL AGRARIA LA MOLINA**"
+output:
+  pdf_document:
+    latex_engine: pdflatex
+    highlight: tango
+    toc: false
+header-includes:
+- \usepackage{graphicx}
+---
+
+\pagenumbering{gobble}
+\begin{center}
+\vspace{0.1cm}
+{\large DEPARTAMENTO DE ESTADÍSTICA E INFORMÁTICA}
+
+\vspace{0.1cm}
+{\large FACULTAD DE ECONOMÍA Y PLANIFICACIÓN}
+
+\vspace{1cm}
+\includegraphics[width=0.25\textwidth]{logo_unalm.png}
+
+\vspace{1.5cm}
+{\Large \textbf{TRABAJO INTEGRADOR}}
+
+\vspace{0.5cm}
+{\large \textbf{Inferencia Estadística 2025-II}}
+
+\vspace{1.5cm}
+\begin{tabular}{|l|r|}
+\hline
+\textbf{Integrante} & \textbf{Código} \\
+\hline
+Montúfar Paiva Yeraldi Mercedes & 20230400 \\
+\hline
+Kay Daniela L. Zavala Malpartida & 20230420 \\
+\hline
+Rojas Taco Fabiana & 2023  \\
+\hline
+Castillo Ruiz Mauricio Gabriel & 20230384 \\
+\hline
+Gómez Vigo Héctor Estefano & 20230397 \\
+\hline
+ &  \\
+\hline
+ &  \\
+\hline
+\end{tabular}
+
+\vspace{1.5cm}
+\textbf{Docente:} Fernando Miranda Villagómez
+
+\vspace{1cm}
+\textbf{LA MOLINA - LIMA - PERÚ 2025}
+
+\end{center}
+\newpage
+\pagenumbering{arabic}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+
+# 1. UNA SOLA BASE DE DATOS ORIGINAL (n = 1000)
+set.seed(123)
+alpha_true <- 2
+beta_true <- 3
+n <- 1000
+reclamos <- alpha_true / (1 - runif(n))^(1/beta_true)
+```
+
+## Distribución Pareto:
+
+$$
+\begin{aligned}
+&f(x)=\frac{\beta \alpha^\beta}{x^{\beta+1}} I_{(\alpha, \infty)}(x)\\
+&E(X) = \frac{\alpha \beta}{\beta - 1} \quad \text{; } \quad \operatorname{VAR}(X) = \left( \frac{\alpha}{\beta - 1} \right)^2 \frac{\beta}{\beta - 2}
+\end{aligned}
+$$
+
+
+## **1.1 EMV para parametro alfa:**
+
+Usaremos el Método de máxima verosimilitud para poder hallar el primer estimador para alfa:
+
+$$
+\begin{aligned}
+L(\alpha, \beta) 
+&= \prod_{i=1}^n f(x_i ; \alpha, \beta) 
+= \prod_{i=1}^n \frac{\beta \alpha^\beta}{x_i^{\beta+1}} \, I_{[\alpha, \infty)}(x_i)\ 
+&= \beta^n \alpha^{n\beta} \left( \prod_{i=1}^n x_i^{-(\beta+1)} \right) 
+\times \prod_{i=1}^n I_{[\alpha, \infty)}(x_i)
+\end{aligned}
+$$ Analizando la indicadora:
+
+$$
+\begin{aligned}
+\prod_{i=1}^n I_{[\alpha, \infty]}\left(x_i\right) & =I\left(\bigcap_{i=i}^n\left\{x_i \geq \alpha\right\}\right) \\
+& =I\left(\alpha \leq x_1, \alpha \leq x_2, \ldots \alpha \leq x_n\right) \\
+& =I\left(\alpha \leq m i\left(x_1, \ldots, x_n\right\}\right)=I\left(\alpha \leq y_1\right]
+\end{aligned}
+$$ donde y1 = X(1) es el mínimo de la muestra:
+
+$$
+El \text{ EMV de } \theta = \alpha \text{ es } \; T = Y_{1}.
+$$
+
+### **1.1.2 Propiedades:**
+
+#### **a) Insesgamiento:**
+
+Distribución del mínimo:
+
+$$
+\begin{aligned}
+&X_1 \ldots X_n \sim \text { Pareto }(\alpha, \beta) \text { i i d }\\
+&\begin{aligned}
+& \quad F(x)=1-\left(\frac{\alpha}{x}\right)^\beta, x \geqslant \alpha \\
+& y=x_i \\
+& F x_i(y)=n[1-F(y)]^{n-1} \mathcal{F}(y) \rightarrow n\left[\left(\frac{\alpha}{\beta}\right)^\beta\right]^{\beta-1} \cdot \frac{\beta \alpha^\beta}{y^{\beta+1}} \\
+& =n\left[\frac{\alpha^{\beta(n-1)}}{\alpha^{\beta(n-1)}}\right] \cdot \frac{\beta \alpha^\beta}{y^{\beta+1}}=\frac{(n \beta) \alpha^{n \beta}}{y^{n \beta+1}}, y \geqslant \alpha \\
+& \\
+& \quad \rightarrow x_1 \sim \operatorname{Pareto}(\alpha, n \beta)
+\end{aligned}
+\end{aligned}
+$$
+
+Hay sesgo positivo, es decir que sobrestima al parametro, no cumple propiedades de Insesgamiento. Ahora lo veremos mejor con los valores para nuestra data:
+
+```{r}
+# 1. Valor observado del mínimo 
+alpha_EMV_observado <- min(reclamos)
+# 2. Valor esperado teórico del mínimo
+E_alpha_EMV_teorico <- (n * beta_true * alpha_true) / (n * beta_true - 1)
+```
+
+```{r, echo=FALSE}
+print(paste("El valor observado es:", alpha_EMV_observado, "y el valor esperado es:", E_alpha_EMV_teorico))
+```
+
+El valor observado en los datos fue de 2.00031, mientras que el valor esperado teórico es 2.00067, ambos ligeramente por encima del valor real del parámetro (alfa = 2.00000). Esto confirma que, para muestras finitas, el estimador tiende a sobrestimar el parámetro verdadero, aunque en este caso la magnitud del sesgo es muy pequeña (del orden de 0.0003 a 0.0007). La cercanía entre el valor observado y el teórico valida la expresión matemática del sesgo y respalda la propiedad de insesgamiento asintótico, ya que a medida que el tamaño de muestra aumenta, el sesgo tiende a cero.
+
+
+```{r, echo=FALSE, warning=FALSE}
+# =============================================================================
+# DEMOSTRACIÓN VISUAL: SESGO POSITivo Y CONVERGENCIA ASINTÓTICA
+# =============================================================================
+# 1. UNA SOLA BASE DE DATOS ORIGINAL (n = 1000)
+set.seed(123)
+alpha_true <- 2
+beta_true <- 3
+n_total <- 1000
+reclamos <- alpha_true / (1 - runif(n_total))^(1/beta_true)
+
+# 2. Tamaños de submuestra 
+n_values <- seq(10, 1000, by = 10)
+
+# 3. Calcular E[α_EMV] teórico para cada n
+results <- data.frame(n = n_values)
+results$E_teorico <- (results$n * beta_true * alpha_true) / (results$n * beta_true - 1)
+
+# 4. Gráfico de convergencia
+library(ggplot2)
+
+ggplot(results, aes(x = n)) +
+  geom_line(aes(y = E_teorico, color = "E[alfa_EMV] teórico"), linewidth = 1.5) +
+  geom_hline(yintercept = alpha_true, color = "red", linetype = "dashed", linewidth = 1) +
+  geom_ribbon(aes(ymin = alpha_true, ymax = E_teorico), fill = "pink", alpha = 0.3) +
+  labs(
+    title = "Sesgo Positivo y Convergencia Asintótica de alfa_EMV",
+    x = "Tamaño de muestra (n)",
+    y = "Valor esperado E[alfa_EMV]",
+    color = ""
+  ) +
+  scale_color_manual(values = c("E[alfa_EMV] teórico" = "blue")) +
+  theme_minimal() +
+  annotate("text", x = 500, y = 2.15, 
+           label = "Sesgo positivo: E[alfa_EMV] > alfa", 
+           color = "darkred", size = 4.5, fontface = "bold") +
+  annotate("text", x = 800, y = 2.02, 
+           label = paste("Límite asintótico: α =", alpha_true), 
+           color = "red", size = 4) +
+  ylim(1.95, 2.2)
+```
+
+de nuestra base de datos, tomamos submuestras que van incrementando su valor para verificar que tendiendo al infinito (tamaños suficientemente grande) podemos ver como el valor tiende al parámetro de alfa = 2. 
+
+#### **b) Consistencia:**
+
+Podemos hacer uso del Teorema 2, por la propiedad anterior del insesgamiento asintotico 
+
+$$
+\begin{aligned}
+& \bullet \quad \lim_{n \rightarrow \infty} E(y_1) = \alpha \quad \text{ya que} \quad 
+\lim_{n \rightarrow \infty} \frac{n \beta \cdot \alpha}{n \beta - 1} 
+= \lim_{n \rightarrow \infty} \frac{\beta \alpha}{\beta - \frac{1}{n}} = \frac{\beta \alpha}{\beta} = \alpha \\
+& \bullet \quad \lim_{n \rightarrow \infty} \operatorname{Var}(y_1) 
+= \lim_{n \rightarrow \infty} \frac{n \beta \alpha^2}{(n \beta - 1)^2 (n \beta - 2)} 
+= \lim_{n \rightarrow \infty} \frac{n \beta \alpha^2}{n^3 \beta^3} 
+= \lim_{n \rightarrow \infty} \frac{\alpha^2}{n^2 \beta^2} = 0
+\end{aligned}
+$$ 
+
+Como podemos obervar cumple ambas condiciones, por ende decimos que nuestro estimador es consitente n otras palabras el estimador 
+converge en probabilidades al parametro.  
+
+```{r, include=FALSE}
+## Aca vemos la var de la muestra total, para ver que es cercana a 0
+var_teorica <- (n * beta_true * alpha_true^2) / ((n * beta_true - 1)^2 * (n * beta_true - 2))
+var_teorica
+```
+
+** Gráfico:** Hemos visto ya un gráfico para solidar la primera demostración, ahora veamos uno que consolide la segunda condición:  
+
+```{r, echo=FALSE}
+# =============================================================================
+# GRÁFICO: VARIANZA DE α_EMV TIENDE A CERO
+# =============================================================================
+
+# Valores para el gráfico
+n_var <- seq(10, 1000, by = 10)
+
+# Varianza teórica de α_EMV 
+var_teorica <- (n_var * beta_true * alpha_true^2) / ((n_var * beta_true - 1)^2 * (n_var * beta_true - 2))
+
+results_var <- data.frame(n = n_var, varianza = var_teorica)
+
+ggplot(results_var, aes(x = n, y = varianza)) +
+  geom_line(color = "purple", linewidth = 1.2) +
+  labs(
+    title = "Convergencia de la Varianza de alfa_EMV hacia Cero",
+    subtitle = "Var(alfa_EMV) tiende 0 cuando n tiende inf",
+    x = "Tamaño de muestra n",
+    y = "Var(alfa_EMV)"
+  ) +
+  theme_minimal() +
+  annotate("text", x = 600, y = max(var_teorica)/2, 
+           label = "Var(alfa_EMV) tiende 0", 
+           color = "purple", size = 5) +
+  ylim(0, max(var_teorica))
+```
+
+
+#### **c) Suficiencia:**
+
+$$
+\begin{aligned}
+& P(x=x / t=T)=\frac{P\left(x_1=x_1 \ldots x_n=x_n, T=y_1\right)}{P(T=y_1) }
+\end{aligned}
+$$
+
+$$
+\begin{aligned}
+& \frac{\left(\frac{\beta \alpha^\beta}{x_1^{\beta+1}}\right)\left(\frac{\beta \alpha^\beta}{x_2^{\beta+1}}\right) \cdots\left(\frac{\beta \alpha^\beta}{x_n^{\beta+1}}\right)}{\frac{n \beta \alpha^{n \beta}}{y^{n \beta+1}}}, \quad x_i \geqslant \alpha,\ i=1,2,\ldots,n \\
+& = \frac{\beta^n \cdot \alpha^{n \beta} \cdot \prod_{i=1}^n x_i^{-(\beta+1)}}{\frac{n \beta \alpha^{n \beta}}{y^{n \beta+1}}} = \frac{\beta^{n-1} \cdot y^{n \beta+1} \cdot \prod_{i=1}^n x_i^{-(\beta+1)}}{n}
+\end{aligned}
+$$ 
+
+Dada la dsitribución condicional dado Y = X1, no depende de alfa, entonces podemos decir que es una estadística suficiente para alpha, cumple la propiedad.
+
+#### **d) Ancilaridad:**
+
+La distribución del mínimo $x_{(1)}$ es:   
+
+$$
+\begin{gathered}
+x_{(1)} \sim \mathrm{Pareto}(\alpha, n\beta) \\
+f_{x_{(1)}}(t) = \frac{n \beta \alpha^{n \beta}}{t^{n \beta+1}}, \quad t \geqslant \alpha
+\end{gathered}
+$$
+Como vemos su distribución depende de alfa, no cumple con la propiedad de ancilaridad.  
+
+#### **e) Completitud:**  
+
+#### INSERTAR DESARROLLO DEL CUADERNOP  
+
+Por lo tanto T = Y(1) es una estadística completa para alfa cuando tomamos a beta como conocido.  
+
+Por el Teorema de Bahadur, como es suficiente y completo, podemos afirmar que nuestro estimador es minimal suficiente.  
+
+#### **f) Optimalidad:**  
+
+En nuestro caso alfa_EMV no es óptimo porque es sesgado.
+Pero si existe un estimador óptimo basado en la estadística suficiente que se podría obtener mediante corrección del sesgo. (Teorema de Lehman-Scheffé)
+
+
+
+## **1.2 EMV para parametro Beta:**
+
+Para hallar el estimador debemos remplazar nuestro primer estimador para el parametro alfa:  
+
+$$
+\hat{\alpha}_{MLE} = \min\{X_1, X_2, \dots, X_n\}
+$$
+
+Como sabemos el máximo en L(alpha,beta) es igual al máximo de Ln(Lalpha,beta)) entonces haremos uso del ln:
+
+$$
+\begin{array}{r}
+L(\alpha, \beta) = \beta^n \cdot \alpha^{n\beta} \cdot \prod_{i=1}^n X_i^{-(\beta+1)} \\
+\ln(L(\alpha, \beta)) = n \cdot \ln(\beta) + n\beta \ln(\alpha) - (\beta+1)\sum_{i=1}^n \ln(X_i)
+\end{array}
+$$ 
+
+$$
+\begin{aligned}
+\frac{d \ln (L(\alpha, \beta))}{d \beta} &= \frac{n}{\beta} + n \ln \alpha - \sum_{i=1}^n \ln X_i \\
+&= \frac{n}{\beta} + n \ln \alpha - \sum_{i=1}^n \ln X_i = 0 \\
+&\Rightarrow \frac{n}{\beta} = \sum_{i=1}^n \ln X_i - n \ln \alpha \\
+&\Rightarrow \frac{n}{\beta} = \sum_{i=1}^n \ln \left(\frac{X_i}{\alpha}\right) \\
+&\Rightarrow \hat{\beta} = \frac{n}{\sum_{i=1}^n \ln \left(\frac{X_i}{x_1}\right)}
+\end{aligned}
+$$
+### **1.1. Propiedades:**
+
+#### **a) Insesgamiento**  
+
+Primero analizaremos una parte del denominador para determinar su distribución y se facilite el procedimiento. 
+
+$$
+\begin{aligned}
+F_Y(y) &= P(Y_i \leq y) = P\left( \ln\left( \frac{X_i}{\alpha} \right) \leq y \right) = P(X_i \leq \alpha e^y) \\
+&= 1 - \left( \frac{\alpha}{\alpha e^y} \right)^\beta = 1 - e^{-\beta y}, \quad y \geq 0 \\
+f_Y(y) &= \frac{d}{dy} F_Y(y) = \beta e^{-\beta y}, \quad y \geq 0
+\end{aligned}
+$$
+Analizando el resultado de la distribución, notamos que tiene la forma de la exponencial. Entonces el mínimo igual será exponencial con parametro n por beta. Ademas tomamos a T como la sumatoria, donde por propiedad de ln de una división podemos desplegarlo.
+
+$$
+\begin{aligned}
+Y_i &\sim \text{Exponencial}(\beta) \\
+W = Y_{(1)} &= \min(Y_1, \dots, Y_n) \sim \text{Exp}(n\beta) \\
+T &= \sum_{i=1}^n (Y_i - Y_{(1)}) \sim \text{Gamma}(n-1, \beta) \\
+\hat{\beta} &= \frac{n}{T}, \quad T \sim \text{Gamma}(n-1, \beta) \\
+E\left[ \frac{1}{T} \right] &= \frac{\beta}{n-2}, \quad n > 2 \\
+E[\hat{\beta}] &= n \cdot E\left[ \frac{1}{T} \right] = \frac{n\beta}{n-2}
+\end{aligned}
+$$
+Acá vemos que hay un sesgo presente
+
+$$
+\text{Sesgo} = E[\hat{\beta}] - \beta = \frac{n\beta}{n-2} - \beta = \frac{2\beta}{n-2}
+$$
+
+Por ende, no es un estimador insesgado. Ademas al ser positivo podemos decir que sobrestima al parametro. 

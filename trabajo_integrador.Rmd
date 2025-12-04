@@ -1,0 +1,49 @@
+---
+title: "Trabajo Integrador"
+output:
+  pdf_document:
+    latex_engine: pdflatex
+    highlight: tango
+    toc: true
+header-includes:
+- \usepackage{graphicx}
+---
+
+\pagenumbering{gobble}
+\begin{center}
+\vspace{2cm}
+
+\includegraphics[width=0.3\textwidth]{logo_unalm.png}
+
+\vspace{1cm}
+{\LARGE Universidad Nacional Agraria La Molina}
+
+\vspace{0.5cm}
+{\large Departamento de Estadística e Informática}
+
+\vspace{1cm}
+{\Large \textbf{Trabajo Integrador}}
+
+\vspace{0.5cm}
+{\large Inferencia Estadística 2025-II}
+
+\vspace{1.5cm}
+\begin{tabular}{ll}
+Montúfar Paiva Y. M. & 20230400 \\
+Kay Zavala D. L. & 20230420 \\
+Enciso Condori J. L. & 20230392 \\
+Castillo Ruiz M. G. & 20230384 \\
+Gómez Vigo H. E. & 20230397 \\
+\end{tabular}
+
+\vspace{1.5cm}
+{\large Docente: Frida Coaquira Nina}
+
+\vspace{1cm}
+{\large 2025}
+\end{center}
+\newpage
+\pagenumbering{arabic}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
